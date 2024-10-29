@@ -26,7 +26,7 @@ def kde(samples, h):
 
     # define pdf
     def pdf(x) -> float:
-        kernelSum = 0
+        kernelSum = 0 
         for xSample in samples:
             kernelSum += kernel((x - xSample) / h)
 
@@ -38,7 +38,7 @@ def kde(samples, h):
         estimate[i] = pdf(pos[i])
 
     """
-    ### faster way with numpy vector operations ###
+        ### faster way with numpy vector operations ###
     
     # calculate difference between pos and each sample (with numpy broadcasting)
     diff = (pos.reshape(200, 1) - samples.reshape(1, 100)) / h

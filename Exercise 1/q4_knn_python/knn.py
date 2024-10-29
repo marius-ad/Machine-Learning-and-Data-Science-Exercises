@@ -19,18 +19,14 @@ def knn(samples, k):
     def pdf(V):
         return k / (N * V)
 
-    # reshape for broadcasting
-    broadPos = pos.reshape(200, 1)
-    broadSamples = samples.reshape(1, 100)
-
     # calc distance between positions and each sample and sort
-    distance = np.abs(broadPos - broadSamples)
+    distance = np.abs(pos.reshape(200, 1) - samples.reshape(1, 100))
     distance = np.sort(distance, axis=1)
 
     # take for each pos the kth nearest neighbor
     kth_neighbor_distance = distance[:, k-1]
 
-    estimate = pdf(kth_neighbor_distance)
+    estimate = pdf(2 * kth_neighbor_distance)
 
     # normalize the density function -> integral must be 1
     delta_x = 0.05
