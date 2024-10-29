@@ -17,27 +17,41 @@ def getLogLikelihood(means, weights, covariances, X):
     # logLikelihood  : Log-likelihood (a scalar)
 
     #####Insert your code here for subtask 6a#####
+    
+    means = np.array(means)
+    weights = np.array(weights)
+    covariances = np.array(covariances)
+    X = np.array(X)
 
-    K, D = means.shape
-    N = X.shape[0]
+    N, D = X.shape
+    K = means.shape[0]
 
-    def gauss(x, mean, invCovariance):
-        return np.exp(/ np.sqrt(2* np.pi * covariance)
+    def gauss(x, mean, inv, det):
+        normalization = 1 / (((2*np.pi) ** (D/2)) * (det ** (1/2)))
+        exponent = -0.5 * np.dot(np.dot((x-mean).T, inv), (x-mean))
+
+        return np.exp(exponent) * normalization
 
     logLikelihood = 0.0
 
-    for n in N:
+    for n in range(N):
         x = X[n]
         likelihood = 0.0
   
-        for k in K:
+        for k in range(K):
             mean = means[k]
             weight = weights[k]
-            covariances[:, :, k]
+            covariance = covariances[:, :, k]
 
+            try:
+                invCov = np.linalg.inv(covariance)
+                detCov = np.linalg.det(covariance)
+            except np.linalg.LinAlgError:
+                continue
 
-
-
+            likelihood += weight * gauss(x, mean, invCov, detCov)
+        
+        logLikelihood += np.log(likelihood)
 
     return logLikelihood
 
