@@ -26,32 +26,33 @@ def getLogLikelihood(means, weights, covariances, X):
     N, D = X.shape
     K = means.shape[0]
 
-    def gauss(x, mean, inv, det):
-        normalization = 1 / (((2*np.pi) ** (D/2)) * (det ** (1/2)))
-        exponent = -0.5 * np.dot(np.dot((x-mean).T, inv), (x-mean))
 
-        return np.exp(exponent) * normalization
+    # calculate likelihood for all K Gaussians, parallel for all N data points
+    likelihoods = np.zeros(N)
+    for k in range(K):
+        mean = means[k]
+        weight = weights[k]
+        covariance = covariances[:, :, k]
 
-    logLikelihood = 0.0
+        try:
+            invCov = np.linalg.inv(covariance)
+            detCov = np.linalg.det(covariance)
+        except np.linalg.LinAlgError:
+                raise np.linalg.LinAlgError(f"covariance matrice for {k} is singular.")
 
-    for n in range(N):
-        x = X[n]
-        likelihood = 0.0
-  
-        for k in range(K):
-            mean = means[k]
-            weight = weights[k]
-            covariance = covariances[:, :, k]
+        # diffrence between each datapoint and the mean
+        diff = X - mean # Shape: (N, D)
 
-            try:
-                invCov = np.linalg.inv(covariance)
-                detCov = np.linalg.det(covariance)
-            except np.linalg.LinAlgError:
-                continue
+        # Compute exponent for all datapoints and normalization
+        exponent = -0.5 * np.sum(diff @ invCov * diff, axis=1)
+        normalization = 1 / (((2 * np.pi) ** (D / 2)) * (detCov ** 0.5))
 
-            likelihood += weight * gauss(x, mean, invCov, detCov)
-        
-        logLikelihood += np.log(likelihood)
+        gauss_pdf = normalization * np.exp(exponent)
+    
+        # add to likelihoods
+        likelihoods += weight * gauss_pdf
+
+    logLikelihood = np.sum(np.log(likelihoods))
 
     return logLikelihood
 

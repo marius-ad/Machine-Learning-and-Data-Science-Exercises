@@ -20,4 +20,33 @@ def MStep(gamma, X):
     # covariances    : Covariance matrices for each component(DxDxK).
 
     #####Insert your code here for subtask 6c#####
+    gamma = np.array(gamma)
+    X = np.array(X)
+
+    N, K = gamma.shape
+    D = X.shape[1]
+
+    N_k = np.sum(gamma, axis=0)
+    weights = N_k / N
+    means = np.dot(gamma.T, X) / N_k[:, np.newaxis]
+
+    covariances = np.zeros((D, D, K))
+    for k in range(K):
+        # Differenz zwischen Datenpunkten und dem neuen Mittelwert
+        diff = X - means[k]  # Shape: (N, D)
+        
+        # Gewichtete Summe der äußeren Produkte
+        weighted_diff = gamma[:, k][:, np.newaxis] * diff  # Shape: (N, D)
+        cov_k = np.dot(weighted_diff.T, diff) / N_k[k]  # Shape: (D, D)
+        
+        # Optional: Regularisierung der Kovarianzmatrizen, um Singularitäten zu vermeiden
+        # Hier wird eine kleine Diagonalkomponente hinzugefügt
+        reg = 1e-6 * np.eye(D)
+        cov_k += reg
+        
+        covariances[:, :, k] = cov_k  # Shape: (D, D)
+        
+    # Berechnung der Log-Likelihood mit den aktualisierten Parametern
+    logLikelihood = getLogLikelihood(means, weights, covariances, X)
+
     return weights, means, covariances, logLikelihood
