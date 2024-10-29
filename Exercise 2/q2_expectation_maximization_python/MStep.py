@@ -32,21 +32,17 @@ def MStep(gamma, X):
 
     covariances = np.zeros((D, D, K))
     for k in range(K):
-        # Differenz zwischen Datenpunkten und dem neuen Mittelwert
+        # diffrence between each datepoint and the current mean
         diff = X - means[k]  # Shape: (N, D)
         
-        # Gewichtete Summe der äußeren Produkte
+        # 
         weighted_diff = gamma[:, k][:, np.newaxis] * diff  # Shape: (N, D)
         cov_k = np.dot(weighted_diff.T, diff) / N_k[k]  # Shape: (D, D)
         
-        # Optional: Regularisierung der Kovarianzmatrizen, um Singularitäten zu vermeiden
-        # Hier wird eine kleine Diagonalkomponente hinzugefügt
-        reg = 1e-6 * np.eye(D)
-        cov_k += reg
         
         covariances[:, :, k] = cov_k  # Shape: (D, D)
         
-    # Berechnung der Log-Likelihood mit den aktualisierten Parametern
+    # calculate new likelihood
     logLikelihood = getLogLikelihood(means, weights, covariances, X)
 
     return weights, means, covariances, logLikelihood
